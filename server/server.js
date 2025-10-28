@@ -27,6 +27,7 @@ app.get('/test', (req, res) => {
     res.json({ 
         success: true, 
         message: 'الخادم يعمل بنجاح!',
+        database: mongoose.connection.readyState === 1 ? 'متصل' : 'غير متصل',
         timestamp: new Date().toISOString()
     });
 });
@@ -34,22 +35,34 @@ app.get('/test', (req, res) => {
 // الاتصال بقاعدة البيانات
 const connectDB = async () => {
     try {
-        const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://shamsaldeen2712_db_user:6b5R9w9JMqWW9JSo@cluster0.6bg51jr.mongodb.net/study_platform?retryWrites=true&w=majority';
+        const MONGODB_URI = process.env.MONGODB_URI;
+        
+        console.log('🔄 محاولة الاتصال بقاعدة البيانات...');
         
         await mongoose.connect(MONGODB_URI, {
             useNewUrlParser: true,
-            useUnifiedTopology: true
+            useUnifiedTopology: true,
+            serverSelectionTimeoutMS: 30000, // 30 ثانية
+            socketTimeoutMS: 45000,
         });
         
         console.log('✅ تم الاتصال بـ MongoDB Atlas بنجاح');
         
-        app.listen(PORT, '0.0.0.0', () => {
-            console.log(`🚀 الخادم يعمل على البورت: ${PORT}`);
-        });
     } catch (error) {
-        console.error('❌ فشل في الاتصال بقاعدة البيانات:', error);
-        process.exit(1);
+        console.error('❌ فشل في الاتصال بقاعدة البيانات:', error.message);
+        console.log('⚠️  الموقع سيعمل بدون قاعدة بيانات');
     }
 };
 
-connectDB();
+// تشغيل الخادم (مع أو بدون قاعدة بيانات)
+const startServer = async () => {
+    await connectDB();
+    
+    app.listen(PORT, '0.0.0.0', () => {
+        console.log(`🚀 الخادم يعمل على البورت: ${PORT}`);
+        console.log(`🌍 رابط الموقع: https://study-platform-2.onrender.com`);
+        console.log(`📊 حالة قاعدة البيانات: ${mongoose.connection.readyState === 1 ? '✅ متصل' : '❌ غير متصل'}`);
+    });
+};
+
+startServer();
