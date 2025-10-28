@@ -1,0 +1,1 @@
+const mongoose = require('mongoose');  const flashcardSetSchema = new mongoose.Schema({      name: String,      cards: [{          question: String,          answer: String      }]  }, { timestamps: true });  module.exports = mongoose.model('FlashcardSet', flashcardSetSchema); 
