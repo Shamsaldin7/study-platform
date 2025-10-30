@@ -12,24 +12,53 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// خدمة الملفات الثابتة - معدل
-app.use(express.static(path.join(__dirname, '..')));
+// خدمة الملفات الثابتة - مسارات مطلقة ومتعددة
+app.use(express.static(path.join(__dirname, '..'))); // المجلد الرئيسي
+app.use(express.static(path.join(__dirname, '..', '/'))); // الجذر
 
-// Routes
+// Routes API
 app.use('/api/sets', require('./routes/sets'));
 
-// Routes الأساسية - معدل
+// Routes الأساسية - مسارات مطلقة مع تحقق
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'index.html'));
+    const filePath = path.join(__dirname, '..', 'index.html');
+    console.log('📁 جاري تحميل ملف الرئيسي:', filePath);
+    
+    // التحقق من وجود الملف
+    if (require('fs').existsSync(filePath)) {
+        res.sendFile(filePath);
+    } else {
+        console.error('❌ ملف index.html غير موجود في:', filePath);
+        res.status(500).send('الملف الرئيسي غير موجود - تحقق من المسارات');
+    }
 });
 
+// Route اختباري محسن
 app.get('/test', (req, res) => {
     res.json({ 
         success: true, 
         message: 'الخادم يعمل بنجاح!',
         database: mongoose.connection.readyState === 1 ? 'متصل' : 'غير متصل',
+        rootDir: __dirname,
         timestamp: new Date().toISOString()
     });
+});
+
+// Route لفحص الملفات
+app.get('/check-files', (req, res) => {
+    const fs = require('fs');
+    const rootPath = path.join(__dirname, '..');
+    const indexPath = path.join(rootPath, 'index.html');
+    
+    const files = {
+        rootExists: fs.existsSync(rootPath),
+        indexExists: fs.existsSync(indexPath),
+        rootPath: rootPath,
+        indexPath: indexPath,
+        filesInRoot: fs.readdirSync(rootPath)
+    };
+    
+    res.json(files);
 });
 
 // الاتصال بقاعدة البيانات
@@ -37,31 +66,39 @@ const connectDB = async () => {
     try {
         const MONGODB_URI = process.env.MONGODB_URI;
         
-        console.log('🔄 محاولة الاتصال بقاعدة البيانات...');
+        if (!MONGODB_URI) {
+            console.log('⚠️  لا يوجد رابط اتصال بقاعدة البيانات');
+            return;
+        }
+
+        console.log('🔄 جاري الاتصال بقاعدة البيانات...');
         
         await mongoose.connect(MONGODB_URI, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
-            serverSelectionTimeoutMS: 30000, // 30 ثانية
+            serverSelectionTimeoutMS: 10000,
             socketTimeoutMS: 45000,
         });
         
-        console.log('✅ تم الاتصال بـ MongoDB Atlas بنجاح');
+        console.log('✅ تم الاتصال بقاعدة البيانات بنجاح');
         
     } catch (error) {
-        console.error('❌ فشل في الاتصال بقاعدة البيانات:', error.message);
-        console.log('⚠️  الموقع سيعمل بدون قاعدة بيانات');
+        console.error('❌ خطأ في الاتصال بقاعدة البيانات:', error.message);
+        console.log('🔧 جاري العمل بدون قاعدة البيانات...');
     }
 };
 
-// تشغيل الخادم (مع أو بدون قاعدة بيانات)
+// تشغيل الخادم
 const startServer = async () => {
+    console.log('🚀 جاري تشغيل الخادم...');
+    console.log('📁 المسار الحالي:', __dirname);
+    
     await connectDB();
     
     app.listen(PORT, '0.0.0.0', () => {
-        console.log(`🚀 الخادم يعمل على البورت: ${PORT}`);
-        console.log(`🌍 رابط الموقع: https://study-platform-2.onrender.com`);
-        console.log(`📊 حالة قاعدة البيانات: ${mongoose.connection.readyState === 1 ? '✅ متصل' : '❌ غير متصل'}`);
+        console.log(`🎉 الخادم يعمل على البورت: ${PORT}`);
+        console.log(`🌍 الموقع متاح على: https://study-platform-2.onrender.com`);
+        console.log(`📊 حالة قاعدة البيانات: ${mongoose.connection.readyState === 1 ? '✅ متصل' : '⚠️  غير متصل'}`);
     });
 };
 
