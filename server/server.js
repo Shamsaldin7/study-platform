@@ -12,24 +12,48 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// خدمة الملفات الثابتة - مسارات مطلقة ومتعددة
-app.use(express.static(path.join(__dirname, '..'))); // المجلد الرئيسي
-app.use(express.static(path.join(__dirname, '..', '/'))); // الجذر
+// خدمة الملفات الثابتة - جميع المسارات الممكنة
+app.use(express.static(path.join(__dirname, '..', '..')));
+app.use(express.static(path.join(__dirname, '..')));
+app.use(express.static(path.join(__dirname)));
 
 // Routes API
 app.use('/api/sets', require('./routes/sets'));
 
-// Routes الأساسية - مسارات مطلقة مع تحقق
+// Routes الأساسية - مسارات متعددة مع تحقق
 app.get('/', (req, res) => {
-    const filePath = path.join(__dirname, '..', 'index.html');
-    console.log('📁 جاري تحميل ملف الرئيسي:', filePath);
+    const fs = require('fs');
     
-    // التحقق من وجود الملف
-    if (require('fs').existsSync(filePath)) {
-        res.sendFile(filePath);
+    // جميع المسارات الممكنة لـ index.html
+    const possiblePaths = [
+        path.join(__dirname, '..', '..', 'index.html'),  // للمجلد الرئيسي
+        path.join(__dirname, '..', 'index.html'),        // للمجلد الأعلى
+        path.join(__dirname, 'index.html'),              // للمجلد الحالي
+        path.resolve(__dirname, '../../index.html'),     // المسار المطلق
+    ];
+    
+    console.log('🔍 جاري البحث عن index.html في المسارات:');
+    
+    let foundPath = null;
+    for (const filePath of possiblePaths) {
+        console.log('   📁 فحص:', filePath);
+        if (fs.existsSync(filePath)) {
+            foundPath = filePath;
+            console.log('✅ وجد الملف في:', foundPath);
+            break;
+        }
+    }
+    
+    if (foundPath) {
+        res.sendFile(foundPath);
     } else {
-        console.error('❌ ملف index.html غير موجود في:', filePath);
-        res.status(500).send('الملف الرئيسي غير موجود - تحقق من المسارات');
+        console.error('❌ ملف index.html غير موجود في أي من المسارات التالية:');
+        possiblePaths.forEach(p => console.log('   ❌', p));
+        res.status(500).json({
+            error: 'الملف الرئيسي غير موجود',
+            searchedPaths: possiblePaths,
+            currentDir: __dirname
+        });
     }
 });
 
@@ -47,15 +71,18 @@ app.get('/test', (req, res) => {
 // Route لفحص الملفات
 app.get('/check-files', (req, res) => {
     const fs = require('fs');
-    const rootPath = path.join(__dirname, '..');
-    const indexPath = path.join(rootPath, 'index.html');
+    const rootPath = path.join(__dirname, '..', '..');
+    const serverPath = path.join(__dirname, '..');
+    const currentPath = __dirname;
     
     const files = {
+        rootDir: __dirname,
         rootExists: fs.existsSync(rootPath),
-        indexExists: fs.existsSync(indexPath),
-        rootPath: rootPath,
-        indexPath: indexPath,
-        filesInRoot: fs.readdirSync(rootPath)
+        serverExists: fs.existsSync(serverPath),
+        currentExists: fs.existsSync(currentPath),
+        filesInRoot: fs.existsSync(rootPath) ? fs.readdirSync(rootPath) : [],
+        filesInServer: fs.existsSync(serverPath) ? fs.readdirSync(serverPath) : [],
+        filesInCurrent: fs.existsSync(currentPath) ? fs.readdirSync(currentPath) : []
     };
     
     res.json(files);
