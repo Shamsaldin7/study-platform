@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>منصة المذاكرة التفاعلية | بطاقات تعليمية ذكية</title>
+        <meta name="description" content="منصة عربية للمذاكرة باستخدام البطاقات التفاعلية والاختبارات الذكية">
+        <link rel="stylesheet" href="CssStyle.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    </head>
+    <body>
+        <!-- شريط التنقل الرئيسي -->
+        <header class="main-header">
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo">
+                        <h1>🎓 منصة المذاكرة</h1>
+                        <span class="tagline">تعلم بذكاء، ذاكر بفعالية</span>
+                    </div>
+                    <nav class="main-nav">
+                        <button class="nav-btn active" data-section="input-section">
+                            <span class="icon">📝</span>
+                            إنشاء المحتوى
+                        </button>
+                        <button class="nav-btn" data-section="flashcard-section" disabled>
+                            <span class="icon">🎴</span>
+                            البطاقات
+                        </button>
+                        <button class="nav-btn" data-section="quiz-section" disabled>
+                            <span class="icon">📊</span>
+                            الاختبارات
+                        </button>
+                    </nav>
+                </div>
+            </div>
+        </header>
+
+        <!--المحتوى الرئيسي-->
+        <main class="main-content">
+            <div class="container">
+                <!-- قسم إنشاء المحتوى -->
+                <section id="input-section" class="content-section active">
+                    <div class="section-header">
+                        <h2>🚀 ابدأ رحلة المذاكرة</h2>
+                        <p>حول ملاحظاتك إلى بطاقات تعليمية تفاعلية في دقائق</p>
+                    </div>
+
+                    <div class="input-container">
+                        <div class="input-guide">
+                            <h3>كيفية الإدخال:</h3>
+                            <ul>
+                                <li>اكتب كل سؤال وإجابة في سطر منفصل</li>
+                                <li>افصل بين السؤال و الإجابة بنقطتين (:)</li>
+                                <li>مثال: <code>ما هي عاصمة السودان؟:الخرطوم</code></li>
+                            </ul>
+                        </div>
+
+                        <textarea
+                        id="notes-input"
+                        class="notes-textarea"
+                        placeholder="أدخل محتوى المذاكرة هنا...
+مثال:
+ما هي عاصمة فرنسا؟:باريس
+ما هو العنصر الكيميائي للذهب؟:Au
+كم عدد كواكب المجموعة الشمسية؟:8 كواكب"
+                        rows="12"></textarea>
+
+                        <div class="input-actions">
+                            <button id="convert-btn" class="btn btn-primary">
+                                <span class="icon">✨</span>
+                                تحويل إلى بطاقات
+                            </button>
+                            <button id="load-sets-btn" class="btn btn-secondary">
+                                <span class="icon">📂</span>
+                                المجموعات المحفوظة
+                            </button>
+                        </div>
+                        <div class="input-actions">
+                            <button id="sample-data-btn" class="btn btn-outline">
+                                <span class="icon">🎯</span>
+                                بيانات تجريبية
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!--قسم البطاقات التفاعلية-->
+                <section id="flashcard-section" class="content-section">
+                    <div class="section-header">
+                        <h2>🎴 مراجعة البطاقات</h2>
+                        <p id="cards-count">0 بطاقة متاحة</p>
+                    </div>
+
+                    <div class="flashcard-area">
+                        <div id="flashcard-container" class="flashcard">
+                            <div class="card-inner">
+                                <div class="card-front">
+                                    <div class="card-content">
+                                        <h3 id="card-question">السؤال يظهر هنا</h3>
+                                        <div class="card-hint">انقر لرؤية الإجابة</div>
+                                    </div>
+                                </div>
+                                <div class="card-back">
+                                    <div class="card-content">
+                                        <h3 id="card-answer">الإجابة تظهر هنا</h3>
+                                        <div class="card-actions">
+                                            <button class="btn-sm btn-success mark-correct">
+                                                ✓ أعرفها 
+                                            </button>
+                                            <button class="btn-sm btn-danger mark-wrong">
+                                                ✗ أحتاج مراجعة   
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flashcard-controls">
+                            <button id="prev-card-btn" class="btn btn-secondary">
+                                ← السابقة
+                            </button>
+
+                            <div class="progress-info">
+                                <span id="card-counter">0/0</span>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+
+                            <button id="next-card-btn" class="btn btn-primary">
+                                التالية →
+                            </button>
+                        </div>  
+                    </div>
+
+                    <div class="management-panel">
+                        <div class="panel-section">
+                            <h4>💾 حفظ ومشاركة</h4>
+                            <div class="share-controls">
+                                <input
+                                type="text" 
+                                id="share-link-output" 
+                                class="share-input" 
+                                readonly 
+                                placeholder="سيظهر رابط المشاركة هنا"
+                                >
+                                <button id="copy-share-btn" class="btn btn-secondary">
+                                    نسخ الرابط   
+                                </button>
+                                <button id="save-db-btn" class="btn btn-primary">
+                                    حفظ المجموعة
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4>📊 تقدم التعلم</h4>
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <span class="stat-number" id="total-cards">0</span>
+                                    <span class="stat-label">إجمالي البطاقات</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-number" id="known-cards">0</span>
+                                    <span class="stat-label">معروفة</span>
+                                </div> 
+                                <div class="stat-item">
+                                    <span class="stat-number" id="review-cards">0</span>
+                                    <span class="stat-label">تحتاج مراجعة</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- قسم الاختبارات -->
+                <section id="quiz-section" class="content-section">
+                    <div class="section-header">
+                        <h2>📊 اختبار الفهم</h2>
+                        <p id="quiz-info">اختبر معرفتك وتابع تقدمك</p>
+                    </div>
+
+                    <div id="quiz-container" class="quiz-container">
+                        <div class="quiz-card">
+                            <div class="quiz-header">
+                                <span class="quiz-counter">سؤال 1 من 10</span>
+                                <span class="quiz-score">الدرجة: 0/0</span>
+                            </div>
+
+                            <div class="quiz-content">
+                                <h3 id="quiz-question-text">ما هو السؤال؟</h3>
+
+                                <div class="answer-section">
+                                    <input
+                                    type="text"
+                                    id="quiz-answer-input"
+                                    class="answer-input"
+                                    placeholder="اكتب إجابتك هنا..."
+                                    >
+                                    <button id="submit-answer-btn" class="btn btn-primary">
+                                        تحقق من الإجابة
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="quiz-feedback" class="quiz-feedback hidden">
+                                <div class="feedback-content">
+                                    <p id="result-message"></p>
+                                    <button id="next-quiz-btn" class="btn btn-primary">
+                                        السؤال التالي
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="final-result" class="final-results hidden">
+                            <div class="results-card">
+                                <h3>🎉 انتهى الاختبار</h3>
+                                <div class="score-circle">
+                                    <span id="final-score">0%</span>
+                                </div>
+                                <p id="score-message" class="score-message">رسالة الأداء</p>
+                                <div class="results-actions">
+                                    <button id="restart-quiz-btn" class="btn btn-primary">
+                                        إعادة الاختبار
+                                    </button>
+                                    <button id="back-to-cards-btn" class="btn btn-secondary">
+                                        العودة للبطاقات
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- النوافذ المنبثقة -->
+        <div id="sets-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>📂 المجموعات المحفوظة</h3>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div id="saved-sets-list" class="sets-list">
+                        <!-- سيتم ملؤها بالبيانات -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- التحميل-->
+        <div id="loading" class="loading hidden">
+            <div class="spinner"></div>
+            <p>جاري المعالجة...</p>
+        </div>
+
+        <script src="jsweb.js"></script>
+    </body>
+</html>
