@@ -296,6 +296,13 @@ class StudyPlatform {
     checkSharedCards() {
         const urlParams = new URLSearchParams(window.location.search);
         const cardsData = urlParams.get('cards');
+        const setId = urlParams.get('setId'); // ✅ جديد: دعم الروابط الجديدة
+
+        if(setId) {
+            // ✅ تحميل المجموعة من قاعدة البيانات باستخدام الـ setId
+            this.loadSet(setId);
+            return;
+        }
 
         if(cardsData) {
             try {
@@ -466,6 +473,13 @@ class StudyPlatform {
 
             if(result.success) {
                 this.showNotification(`تم حفظ المجموعة "${setName}" بنجاح 💾`, 'success');
+                
+                // ✅ جديد: بناء رابط المشاركة تلقائيًا باستخدام الـ setId
+                if(result.setId) {
+                    const shareLink = `${window.location.origin}${window.location.pathname}?setId=${result.setId}`;
+                    document.getElementById('share-link-output').value = shareLink;
+                    this.showNotification('تم إنشاء رابط المشاركة تلقائيًا! 🔗', 'success');
+                }
             } else {
                 throw new Error(result.message);
             }
@@ -499,7 +513,7 @@ class StudyPlatform {
             setsList.innerHTML = '<p style="text-align: center; color: var(--text-light);">لا توجد مجموعات محفوظة</p>';
         } else {
             setsList.innerHTML = sets.map(set => `
-                <div class="set-item" data-set-id="${set.id}">
+                <div class="set-item" data-set-id="${set._id}">
                     <div class="set-name">${set.name}</div>
                     <div class="set-meta">
                         <span>${set.cards.length} بطاقة</span>
