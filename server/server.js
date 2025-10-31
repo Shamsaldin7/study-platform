@@ -6,20 +6,42 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 10000;
 
+// 🔍 تشخيص مفصل
+console.log('=== تشخيص بدء التشغيل ===');
+console.log('PORT:', process.env.PORT);
+console.log('MONGODB_URI موجود:', !!process.env.MONGODB_URI);
+console.log('MONGODB_URI يبدأ بـ mongodb:', process.env.MONGODB_URI?.startsWith('mongodb'));
+
+if (process.env.MONGODB_URI) {
+    console.log('MONGODB_URI length:', process.env.MONGODB_URI.length);
+    // إظهار جزء من السلسلة (بدون الباسوورد)
+    const safeURI = process.env.MONGODB_URI.replace(/:(.*)@/, ':****@');
+    console.log('MONGODB_URI (safe):', safeURI);
+} else {
+    console.log('❌ MONGODB_URI غير موجود!');
+}
+
 // إعدادات أساسية
 app.use(express.json());
 app.use(express.static(__dirname));
-
-console.log('🔍 بدء تشغيل الخادم...');
 
 // الاتصال بقاعدة البيانات
 const connectDB = async () => {
     try {
         console.log('🔗 جاري الاتصال بقاعدة البيانات...');
-        await mongoose.connect(process.env.MONGODB_URI);
+        
+        if (!process.env.MONGODB_URI) {
+            throw new Error('MONGODB_URI غير محدد في Environment Variables');
+        }
+        
+        await mongoose.connect(process.env.MONGODB_URI, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        });
         console.log('✅ تم الاتصال بقاعدة البيانات بنجاح');
     } catch (error) {
         console.error('❌ خطأ في الاتصال:', error.message);
+        console.log('🔍 نوع الخطأ:', error.name);
         process.exit(1);
     }
 };
