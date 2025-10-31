@@ -34,15 +34,27 @@ const connectDB = async () => {
             throw new Error('MONGODB_URI غير محدد في Environment Variables');
         }
         
-        await mongoose.connect(process.env.MONGODB_URI, {
+        // حل مشكلة DNS
+        const options = {
             useNewUrlParser: true,
             useUnifiedTopology: true,
-        });
+            serverSelectionTimeoutMS: 30000,
+            socketTimeoutMS: 45000,
+            // إعدادات DNS إضافية
+            family: 4, // فرض استخدام IPv4
+        };
+
+        await mongoose.connect(process.env.MONGODB_URI, options);
+        
         console.log('✅ تم الاتصال بقاعدة البيانات بنجاح');
     } catch (error) {
         console.error('❌ خطأ في الاتصال:', error.message);
         console.log('🔍 نوع الخطأ:', error.name);
-        process.exit(1);
+        console.log('🔍 رمز الخطأ:', error.code);
+        
+        // إعادة المحاولة مع إعدادات مختلفة
+        console.log('🔄 إعادة المحاولة مع إعدادات بديلة...');
+        setTimeout(connectDB, 5000);
     }
 };
 
