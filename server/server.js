@@ -14,7 +14,6 @@ console.log('MONGODB_URI يبدأ بـ mongodb:', process.env.MONGODB_URI?.start
 
 if (process.env.MONGODB_URI) {
     console.log('MONGODB_URI length:', process.env.MONGODB_URI.length);
-    // إظهار جزء من السلسلة (بدون الباسوورد)
     const safeURI = process.env.MONGODB_URI.replace(/:(.*)@/, ':****@');
     console.log('MONGODB_URI (safe):', safeURI);
 } else {
@@ -34,25 +33,20 @@ const connectDB = async () => {
             throw new Error('MONGODB_URI غير محدد في Environment Variables');
         }
         
-        // حل مشكلة DNS
         const options = {
             useNewUrlParser: true,
             useUnifiedTopology: true,
             serverSelectionTimeoutMS: 30000,
             socketTimeoutMS: 45000,
-            // إعدادات DNS إضافية
-            family: 4, // فرض استخدام IPv4
+            family: 4,
         };
 
         await mongoose.connect(process.env.MONGODB_URI, options);
-        
         console.log('✅ تم الاتصال بقاعدة البيانات بنجاح');
     } catch (error) {
         console.error('❌ خطأ في الاتصال:', error.message);
         console.log('🔍 نوع الخطأ:', error.name);
         console.log('🔍 رمز الخطأ:', error.code);
-        
-        // إعادة المحاولة مع إعدادات مختلفة
         console.log('🔄 إعادة المحاولة مع إعدادات بديلة...');
         setTimeout(connectDB, 5000);
     }
@@ -74,7 +68,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'Index.html'));
 });
 
-// حفظ المجموعة
+// حفظ المجموعة - ✅ الكود المصحح
 app.post('/api/sets/save-set', async (req, res) => {
     try {
         const { name, cards, knownCards, reviewCards } = req.body;
@@ -86,11 +80,12 @@ app.post('/api/sets/save-set', async (req, res) => {
             reviewCards: reviewCards || []
         });
 
-        await newSet.save();
+        const savedSet = await newSet.save();  // ✅ احفظ واحصل على النتيجة
         
         res.json({ 
             success: true, 
-            message: 'تم حفظ المجموعة بنجاح'
+            message: 'تم حفظ المجموعة بنجاح',
+            setId: savedSet._id.toString()  // ✅ أضف الـ ID هنا
         });
     } catch (error) {
         console.error('Error saving set:', error);
